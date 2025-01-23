@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>상품 상세 페이지</title>
+    <link href="/css/styles.css" rel="stylesheet">
+    <link rel="icon" href="/images/img/favicon.ico">
+</head>
+
+<body>
+<!-- 헤더 삽입 -->
+<th:block th:replace="~{layout/header :: header}"></th:block>
+
+<!-- 전체 컨테이너 -->
+<div id="product-detail">
+    <form method="get" th:action="@{/purchase/completed/{id}(id=${product.id})}">
+        <div class="detail-container">
+            <!-- 좌측 상단 그리드 -->
+            <div class="left-section">
+                <div class="image">
+                     <img class="product-image" th:src="${product.image}" alt="상품 이미지">
+
+
+                </div>
+            </div>
+
+            <!-- 우측 상단 그리드 -->
+            <div class="right-section">
+                <div class="seller-name">
+                    <img src="/images/svg/home.svg">
+                    <span th:text="${companyName}">상호명</span><br>
+                </div>
+
+                <div class="product-name">
+                    <span th:text="${product.productName}">상품명</span><br>
+                </div>
+
+                <div class="product-price">
+                    <p class="won"><span class="price" th:text="${formattedPrice}"></span>원</p>
+                </div>
+
+                <hr class="line">
+
+                <!-- 옵션 선택 -->
+                <div class="options">
+
+                    <div class="option-select-btn">
+                        <label class="option-label">옵션 선택</label>
+
+                        <!-- 색상 옵션 -->
+                        <select class="option-select" name="option1" required
+                                th:disabled="${option1List == null || option1List.isEmpty() || (option1List.size() == 1 && option1List[0] == '')}">
+                            <option disabled selected value="">색상을 선택하세요</option>
+                            <option th:each="option : ${option1List}" th:text="${option}" th:value="${option}"></option>
+                        </select>
+
+                        <!-- 사이즈 옵션 -->
+                        <select class="option-select" name="option2" required
+                                th:disabled="${option2List == null || option2List.isEmpty() || (option2List.size() == 1 && option2List[0] == '')}">
+                            <option disabled selected value="">사이즈를 선택하세요</option>
+                            <option th:each="option : ${option2List}" th:text="${option}" th:value="${option}"></option>
+                        </select>
+                    </div>
+
+
+                    <div class="total-price">
+                        <label class="option-label">총 상품 금액</label>
+                        <div class="total-price-div">
+                            <p class="won"><span class="price" th:text="${formattedPrice}"></span>원</p>
+                        </div>
+                    </div>
+
+                    <button class="zipup-btn" th:disabled="${session.loginUser.role == 'seller'}" type="submit">바로 구매
+                    </button>
+                </div>
+            </div>
+
+
+            <!-- 하단 상세 이미지 -->
+            <div class="bottom-section">
+                <div class="detail-image">
+                    <img class="description" th:src="${product.description}" alt="상세 이미지">
+                </div>
+            </div>
+        </div>
+        <div th:replace="~{layout/footer :: footer}"></div>
+        <script src="/js/product.js"></script>
+    </form>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const productImage = document.querySelector(".product-image");
+            const descriptionImage = document.querySelector(".description");
+            const refreshInterval = 1000;
+
+            function updateImages() {
+                const productImageUrl = productImage.src.split("?")[0] + "?t=" + new Date().getTime();
+                const descriptionImageUrl = descriptionImage.src.split("?")[0] + "?t=" + new Date().getTime();
+
+                const img1 = new Image();
+                const img2 = new Image();
+
+                img1.onload = function () {
+                    productImage.src = productImageUrl;
+                    img2.onload = function () {
+                        descriptionImage.src = descriptionImageUrl;
+                    };
+                    img2.onerror = function () {
+                        setTimeout(updateImages, refreshInterval);
+                    };
+                    img2.src = descriptionImageUrl;
+                };
+
+                img1.onerror = function () {
+                    setTimeout(updateImages, refreshInterval);
+                };
+                img1.src = productImageUrl;
+            }
+
+            updateImages();
+        });
+
+    </script>
+</div>
+</body>
+</html>
